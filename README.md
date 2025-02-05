@@ -1,7 +1,9 @@
 #La pipeline actuelle :
+
 **1. API -> Kafka**
 - voir reddiAPI, je ferais la doc plus tard (mais ca renvoient en producton kafka plusieurs types d'objets (topics) => les posts, les commentaires et les replies)
 - toutes les minuits (avec `schedulerService`), notre API (qui appel Reddit API) est appelé, l'API joue un rôle de producer pour `Kafka`.
+  
 **2. Logstash**
 - `Logstash` run en backgroup (container special), selon les configs donnés (voir `logstash/pipeline` et `logstash/pipeline.yml`)
 - Les configs logstash envoient les messages kafka vers elatsic-search (pour chaque topic kafka)
