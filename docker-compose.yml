@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
@@ -6,7 +6,7 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
     volumes:
-      - zookeeper_data:/var/lib/zookeeper  # Persistent storage for Zookeeper
+      - zookeeper_data:/var/lib/zookeeper # Persistent storage for Zookeeper
     networks:
       - kafka-network
 
@@ -42,10 +42,67 @@ services:
     networks:
       - kafka-network
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - elastic
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 2g
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.10.2
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      - elastic
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 2g
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.10.2
+    container_name: logstash
+    ports:
+      - "5044:5044"
+      - "9600:9600"
+    environment:
+      - xpack.monitoring.elasticsearch.hosts=http://elasticsearch:9200
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline
+    depends_on:
+      - elasticsearch
+    networks:
+      - elastic
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1g
 volumes:
   zookeeper_data:
   kafka_data:
-
+  elasticsearch_data:
+    driver: local
 networks:
+  elastic:
+    driver: bridge
   kafka-network:
     driver: bridge
