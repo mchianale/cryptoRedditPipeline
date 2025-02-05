@@ -1,4 +1,4 @@
-#La pipeline actuelle :
+# La pipeline actuelle :
 
 **1. API -> Kafka**
 - voir reddiAPI, je ferais la doc plus tard (mais ca renvoient en producton kafka plusieurs types d'objets (topics) => les posts, les commentaires et les replies)
