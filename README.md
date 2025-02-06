@@ -42,7 +42,10 @@ The API exposes several endpoints, including a **health check** to ensure its av
 ### Kafka Integration  
 We have set up a **Kafka cluster** with **three brokers** and **one Zookeeper node**. Having multiple brokers provides resilience and allows us to test Kafka features like replication and failover handling. Zookeeper is used for metadata management, ensuring proper coordination between brokers.  
 
-![global_sch](https://github.com/mchianale/cryptoRedditPipeline/blob/main/doc/kafka.png)
+<p align="center">
+  <img src="https://github.com/mchianale/cryptoRedditPipeline/blob/main/doc/kafka.png" alt="global_sch" width="50%">
+</p>
+
 
 ### Kafka Topics  
 To structure and distribute the data efficiently, we use Kafka **topics**:  
