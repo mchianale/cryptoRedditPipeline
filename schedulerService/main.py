@@ -20,7 +20,6 @@ SEND_ENDPOINT = os.environ["SEND_ENDPOINT"]
 ES_ENDPOINT = os.environ["ES_ENDPOINT"]
 # pieplien hour trigger
 REQUEST_NEW_DATA_HOURS = os.environ["REQUEST_NEW_DATA_HOURS"]
-print(REQUEST_NEW_DATA_HOURS)
 # pretty logging
 SEP = "-"*30
 
@@ -29,7 +28,8 @@ def send_data_to_kafka():
     try:
         start_time = time.time()
         logging.info(f"Triggering API to send data to Kafka... {SEP}")
-        url = f"{SEND_ENDPOINT}?end_date={datetime.datetime.today().strftime('%d/%m/%Y')}"
+        date_today = datetime.datetime.today().strftime('%d/%m/%Y')
+        url = f"{SEND_ENDPOINT}?start_date={date_today}&end_date={date_today}"
         logging.info(f"Calling: {url}...")
         response = requests.post(url)
         end_time = time.time()
@@ -87,11 +87,11 @@ if __name__ == "__main__":
             max_retry += 1
         time.sleep(2)
 
-    send_data_to_kafka()
-    """while True:
+    #send_data_to_kafka()
+    while True:
         my_schedule.run_pending()
         time.sleep(5)  # Sleep for 5 second to prevent high CPU usage
         #This loop checks if any tasks are scheduled to run
         #and executes them when their time comes.
-            # try sending message to kafka (producer)"""
+            # try sending message to kafka (producer)
     

@@ -1,109 +1,84 @@
-# La pipeline actuelle :
+# Title du projet 
+presentation etc...
 
-**1. API -> Kafka**
-- voir reddiAPI, je ferais la doc plus tard (mais ca renvoient en producton kafka plusieurs types d'objets (topics) => les posts, les commentaires et les replies)
-- toutes les minuits (avec `schedulerService`), notre API (qui appel Reddit API) est appelé, l'API joue un rôle de producer pour `Kafka`.
-  
-**2. Logstash**
-- `Logstash` run en backgroup (container special), selon les configs donnés (voir `logstash/pipeline` et `logstash/pipeline.yml`)
-- Les configs logstash envoient les messages kafka vers elatsic-search (pour chaque topic kafka)
-
-# Pour run
-fihcier `.env` à mettre en root:
-```bash
-CLIENT_ID=""
-CLIENT_SECRET=""
-REDDIT_USERNAME=""
-REDDIT_SECRET=""
-USER_AGENT=""
-# Kafka  Configuration (Inside Docker Network)
-KAFKA_BROKERS = "kafka-0:9092,kafka-1:9092,kafka-2:9092"
-# our API endpoint
-HEALTH_ENDPOINT = "http://reddit-api:8000/health_check"
-SEND_ENDPOINT = "http://reddit-api:8000/send_data"
-# To ping elastic-search
-ES_ENDPOINT = "http://elasticsearch:9200"
-# Trigger configuration "HH:mm"
-REQUEST_NEW_DATA_HOURS = "18:00" 
-```
-
-```bash
-docker-compose up -d
-```
-- Data persistents
-- Parfois les block Kafka pètent jsp poruqoi mais ca va !
-- pas besoin de creer à l'avnace un topic kafka 
+To run and change config of our current pipeline see RUN.md
 
 ---
 
-# A faire
-- Je vais faire la documentation de ce que j'ai fais
-- LEs données vont bien sur elatsic serahc mais il faut faire des pre mapping (les mapping sont creer automtiquement sinon c pas optimal)
-- Réaliser des requêtes dans Elasticsearch :
-o 1 requête textuelle
-o 1 requêtes comprenant une aggrégation
-o 1 requête N-gram.
-o 1 requêtes floues (fuzzy).
-o 1 série temporelle.
-- Visu avec kibana
-- apres hadoop u spark pour faire MapReduce 
+## Summary
+
 ---
 
-# Source 
+## Current Architecture
+image 
 
+---
 
+## Kafka & API  
 
-=> ANcien readme.md ici:
+### API - FastAPI  
+The `FastAPI-based` API (here `redditAPI`) plays a crucial role in our project by extracting, processing, and sending Reddit data to Kafka. It is responsible for retrieving posts, comments, and replies from the monitored subreddits based on predefined keywords.  
 
-# API to kafka
-## call the API and produced at the same time
-**POST** `http://localhost:8000/send_data`
-## check if data was produced in kafka
-For example in the first broker :
-```bash
-docker exec -it kafka-0 bash
-cd /opt/bitnami/kafka/bin/
-./kafka-console-consumer.sh --bootstrap-server kafka-0:9092 --topic submissions --from-beginning
+The API exposes several endpoints, including a **health check** to ensure its availability and an endpoint that fetches and sends Reddit data to Kafka within a specified date range.  
+
+### How is RedditAPI used?  
+- In our case, our custom `FastAPI` interacts with the **Reddit API** to retrieve data by searching for new **posts** in specified subreddits based on predefined keywords, along with their comments and replies.  
+- To update the **subreddits** and **keywords** being tracked, modify the `redditAPI/follow_config.json` file.  
+- Our current `redditAPI/follow_config.json` configuration:  
+
+```json
+{
+    "subreddit_names": ["CryptoCurrency", "CryptoMarkets"],
+    "keywords_dict": {
+        "bitcoin": ["btc", "bitcoin"],
+        "ethereum": ["eth", "ethereum"],
+        "dogecoin": ["doge", "dogecoin"],
+        "trumpcoin": ["trump", "trumpcoin"],
+        "solana": ["sol", "solana"]
+    }
+}
 ```
 
-# kafka
-```bash
-docker-compose up -d
-```
+### Kafka Integration  
+We have set up a **Kafka cluster** with **three brokers** and **one Zookeeper node**. Having multiple brokers provides resilience and allows us to test Kafka features like replication and failover handling. Zookeeper is used for metadata management, ensuring proper coordination between brokers.  
 
-# Create a new topic
-```bash
-docker exec -it kafka-0 bash
-# in the container
-cd /opt/bitnami/kafka/bin/
-# create a new topic, here 'submissions'
-kafka-topics.sh \
---bootstrap-server localhost:9092 --create \
---topic submissions --partitions 3 --replication-factor 3
-# create a new topic, here 'comments'
-kafka-topics.sh \
---bootstrap-server localhost:9092 --create \
---topic comments --partitions 3 --replication-factor 3
-# create a new topic, here 'replies'
-kafka-topics.sh \
---bootstrap-server localhost:9092 --create \
---topic replies --partitions 3 --replication-factor 3
-# list all existing topics 
-./kafka-topics.sh --list --bootstrap-server localhost:9092
-# exit
-exit
-# you can check, all data is duplicate in others brokers
-```
+### Kafka Topics  
+To structure and distribute the data efficiently, we use Kafka **topics**:  
+- **`posts`**: Stores information about Reddit posts, including title, text, author, and submission date.  
+- **`comments`**: Captures Reddit comments, linking them to their respective posts and tracking the number of replies.  
+- **`replies`**: Handles replies to comments, preserving their hierarchical structure.  
 
-**Warning**
+Kafka ensures real-time processing and reliable message delivery, enabling seamless downstream consumption of Reddit data for further analysis and insights.  
 
-to shut down kafka brokers :
-```bash
-docker compose down --remove-orphans
-```
+---
 
+## Logstach
+regarde dans folder logstash les fichier conf modifiable etc..
 
+---
 
- 
-# a faire 
-# sources
+## Elastic-search
+### Data & Mappings
+### Queries
+
+---
+
+## Hadoop
+
+---
+
+## Spark
+
+---
+
+## Comparaison Hadoop Vs Spark
+
+---
+
+## Conclusion
+
+---
+
+## Source
+- [Kafka Development With Docker](https://jaehyeon.me/blog/2023-05-04-kafka-development-with-docker-part-1/)
+
