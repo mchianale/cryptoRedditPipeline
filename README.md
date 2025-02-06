@@ -10,7 +10,8 @@ To run and change config of our current pipeline see `RUN.md`.
 ---
 
 ## Current Architecture
-![global_sch](https://github.com/mchianale/cryptoRedditPipeline/main/docs/currentArchi.png)
+![global_sch](https://github.com/mchianale/cryptoRedditPipeline/blob/main/doc/currentArchi.png)
+
 ---
 
 ## Kafka & API  
