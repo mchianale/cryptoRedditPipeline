@@ -1,7 +1,7 @@
 # Title du projet 
 presentation etc...
 
-To run and change config of our current pipeline see RUN.md
+To run and change config of our current pipeline see `RUN.md`.
 
 ---
 
@@ -10,8 +10,7 @@ To run and change config of our current pipeline see RUN.md
 ---
 
 ## Current Architecture
-image 
-
+![global_sch](https://github.com/mchianale/cryptoRedditPipeline/main/docs/currentArchi.png)
 ---
 
 ## Kafka & API  
@@ -52,7 +51,7 @@ Kafka ensures real-time processing and reliable message delivery, enabling seaml
 
 ---
 
-## Logstach
+## Logstash
 regarde dans folder logstash les fichier conf modifiable etc..
 
 ---
