@@ -54,6 +54,7 @@
         }
       },
       "settings": {
+        "index.max_ngram_diff": 10,
         "analysis": {
           "analyzer": {
             "ngram_analyzer": {
@@ -98,6 +99,7 @@
         }
       },
       "settings": {
+        "index.max_ngram_diff": 10,
         "analysis": {
           "analyzer": {
             "ngram_analyzer": {
