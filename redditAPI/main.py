@@ -88,16 +88,16 @@ async def send_data(start_date : str, end_date : str):
                 for post in query_posts:
                     submission_date = datetime.datetime.utcfromtimestamp(post.created)
                     # we reached the limit date, we stop here !
-                    if submission_date.date() < end_date_dt_date:
+                    if submission_date.date() < start_date_dt_date:
                         return {
-                            "status": f"success, reached end_date: {submission_date.date()}",
+                            "status": f"success, reached start_date < {submission_date.date()}",
                             "result": {
                                 "total_post_add": total_posts,
                                 "total_comments_add": total_comments,
                                 "total_replies_add": total_replies
                             }
                         }
-                    elif submission_date.date() > start_date_dt_date:
+                    elif submission_date.date() > end_date_dt_date:
                         continue  
                      # with different keywords we can get same topics
                     elif post.id in cache_already_seen_posts:
