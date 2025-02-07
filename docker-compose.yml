@@ -35,51 +35,54 @@ services:
     volumes:
       - kafka_0_data:/bitnami/kafka
     depends_on:
-      zookeeper:
-        condition: service_healthy
-  # kafka-1:
-  #   image: bitnami/kafka:latest
-  #   container_name: kafka-1
-  #   expose:
-  #     - 9092
-  #   ports:
-  #     - "29093:29093"
-  #   networks:
-  #     - kafkanet
-  #   environment:
-  #     - ALLOW_PLAINTEXT_LISTENER=yes
-  #     - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
-  #     - KAFKA_CFG_BROKER_ID=1
-  #     - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
-  #     - KAFKA_CFG_LISTENERS=INTERNAL://:9092,EXTERNAL://:29093
-  #     - KAFKA_CFG_ADVERTISED_LISTENERS=INTERNAL://kafka-1:9092,EXTERNAL://localhost:29093
-  #     - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=INTERNAL
-  #   volumes:
-  #     - kafka_1_data:/bitnami/kafka
-  #   depends_on:
-  #     - zookeeper
+      - zookeeper
+ 
 
-  # kafka-2:
-  #   image: bitnami/kafka:latest
-  #   container_name: kafka-2
-  #   expose:
-  #     - 9092
-  #   ports:
-  #     - "29094:29094"
-  #   networks:
-  #     - kafkanet
-  #   environment:
-  #     - ALLOW_PLAINTEXT_LISTENER=yes
-  #     - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
-  #     - KAFKA_CFG_BROKER_ID=2
-  #     - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
-  #     - KAFKA_CFG_LISTENERS=INTERNAL://:9092,EXTERNAL://:29094
-  #     - KAFKA_CFG_ADVERTISED_LISTENERS=INTERNAL://kafka-2:9092,EXTERNAL://localhost:29094
-  #     - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=INTERNAL
-  #   volumes:
-  #     - kafka_2_data:/bitnami/kafka
-  #   depends_on:
-  #     - zookeeper
+  kafka-1:
+    image: bitnami/kafka:latest
+    container_name: kafka-1
+    expose:
+      - 9092
+    ports:
+      - "29093:29093"
+    networks:
+      - kafkanet
+    environment:
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_BROKER_ID=1
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=INTERNAL://:9092,EXTERNAL://:29093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=INTERNAL://kafka-1:9092,EXTERNAL://localhost:29093
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=INTERNAL
+    volumes:
+      - kafka_1_data:/bitnami/kafka
+    depends_on:
+      - zookeeper
+    
+
+  kafka-2:
+    image: bitnami/kafka:latest
+    container_name: kafka-2
+    expose:
+      - 9092
+    ports:
+      - "29094:29094"
+    networks:
+      - kafkanet
+    environment:
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_BROKER_ID=2
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=INTERNAL://:9092,EXTERNAL://:29094
+      - KAFKA_CFG_ADVERTISED_LISTENERS=INTERNAL://kafka-2:9092,EXTERNAL://localhost:29094
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=INTERNAL
+    volumes:
+      - kafka_2_data:/bitnami/kafka
+    depends_on:
+      - zookeeper
+    
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
@@ -94,7 +97,7 @@ services:
       - elasticsearch_data:/usr/share/elasticsearch/data
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9200"]
-      interval: 30s
+      interval: 10s
       timeout: 10s
       retries: 5
     # deploy:
@@ -133,17 +136,14 @@ services:
     networks:
       - kafkanet
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health_check"]
+      interval: 10s
       timeout: 10s
       retries: 5
     depends_on:
-      kafka-0:
-        condition: service_healthy
       elasticsearch:
         condition: service_healthy
-      # - kafka-1
-      # - kafka-2
+    
 
   # logstash
   logstash:
@@ -189,12 +189,12 @@ volumes:
   kafka_0_data:
     driver: local
     name: kafka_0_data
-  # kafka_1_data:
-  #   driver: local
-  #   name: kafka_1_data
-  # kafka_2_data:
-  #   driver: local
-  #   name: kafka_2_data
+  kafka_1_data:
+    driver: local
+    name: kafka_1_data
+  kafka_2_data:
+    driver: local
+    name: kafka_2_data
   # elk and kibana
   elasticsearch_data:
     driver: local

@@ -32,7 +32,7 @@ def send_data_to_kafka():
         start_time = time.time()
         logging.info(f"Triggering API to send data to Kafka... {SEP}")
         date_today = datetime.datetime.today().strftime("%d/%m/%Y")
-        url = f"{HEALTH_ENDPOINT}?start_date={date_today}&end_date={date_today}"
+        url = f"{SEND_DATA_ENDPOINT}?start_date={date_today}&end_date={date_today}"
         logging.info(f"Calling: {url}...")
         response = requests.post(url)
         end_time = time.time()
@@ -86,10 +86,10 @@ if __name__ == "__main__":
     # check elastic search is good to
     check_health(ES_ENDPOINT)
 
-    # send_data_to_kafka()
-    while True:
+    send_data_to_kafka()
+    """while True:
         my_schedule.run_pending()
         time.sleep(5)  # Sleep for 5 second to prevent high CPU usage
         # This loop checks if any tasks are scheduled to run
         # and executes them when their time comes.
-        # try sending message to kafka (producer)
+        # try sending message to kafka (producer)"""
