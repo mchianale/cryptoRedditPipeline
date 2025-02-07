@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import os 
 from confluent_kafka import Producer
 import praw
+from praw.models import MoreComments
 import datetime
 
 # Load environment variables from the .env file
@@ -72,7 +73,8 @@ async def send_data(start_date : str, end_date : str):
     if end_date_dt_date > date_today:
         raise HTTPException(status_code=422, detail=f"End date input ('{end_date_dt_date}') must be smaller than or equal to {date_today} !")
     
-    
+    # to manage already_seen posts
+    cache_already_seen_posts = []
     total_posts, total_comments, total_replies = 0, 0, 0
     try:
         for subreddit_name in subreddit_names:
@@ -96,7 +98,12 @@ async def send_data(start_date : str, end_date : str):
                             }
                         }
                     elif submission_date.date() > start_date_dt_date:
-                        continue       
+                        continue  
+                     # with different keywords we can get same topics
+                    elif post.id in cache_already_seen_posts:
+                        continue  
+                    cache_already_seen_posts.append(post.id)      
+                    
                     post_obj = {
                         "subreddit_name" : subreddit_name,
                         "post_id": post.id,
@@ -115,11 +122,15 @@ async def send_data(start_date : str, end_date : str):
 
                     # 2. comments 
                     for comment in post.comments.list():
+                        if isinstance(comment, MoreComments):
+                            continue
                         comment_key = f"{post.id}_{comment.id}"
 
                         # 3. replies
                         replies = comment.replies.list()
                         for reply in replies:
+                            if isinstance(reply, MoreComments):
+                                continue
                             reply_obj = {
                                 "reply_id": reply.id,
                                 "comment_id": comment.id,

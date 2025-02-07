@@ -6,7 +6,14 @@
         "properties": {
           "author": { "type": "keyword" },
           "comment_id": { "type": "keyword" },
-          "text": { "type": "text", "analyzer": "standard" },
+          "text": {
+            "type": "text",
+            "analyzer": "standard",
+            "fields": {
+              "ngram": { "type": "text", "analyzer": "ngram_analyzer" },
+              "fuzzy": { "type": "text", "analyzer": "standard" }
+            }
+          },
           "event": { "type": "object" },
           "reply_id": { "type": "keyword" },
           "submission_date": {
@@ -15,6 +22,26 @@
           },
           "score": { "type": "integer" },
           "author_id": { "type": "keyword" }
+        }
+      },
+      "settings": {
+        "index.max_ngram_diff": 5,
+        "analysis": {
+          "analyzer": {
+            "ngram_analyzer": {
+              "type": "custom",
+              "tokenizer": "ngram_tokenizer",
+              "filter": ["lowercase"]
+            }
+          },
+          "tokenizer": {
+            "ngram_tokenizer": {
+              "type": "ngram",
+              "min_gram": 3,
+              "max_gram": 8,
+              "token_chars": ["letter", "digit"]
+            }
+          }
         }
       }
     }
@@ -31,7 +58,8 @@
             "type": "text",
             "analyzer": "english",
             "fields": {
-              "keyword": { "type": "keyword" }
+              "keyword": { "type": "keyword" },
+              "fuzzy": { "type": "text", "analyzer": "standard" }
             }
           },
           "text": {
@@ -41,7 +69,8 @@
               "ngram": {
                 "type": "text",
                 "analyzer": "ngram_analyzer"
-              }
+              },
+              "fuzzy": { "type": "text", "analyzer": "standard" }
             }
           },
           "category": { "type": "keyword" },
@@ -54,7 +83,7 @@
         }
       },
       "settings": {
-        "index.max_ngram_diff": 10,
+        "index.max_ngram_diff": 8,
         "analysis": {
           "analyzer": {
             "ngram_analyzer": {
@@ -67,7 +96,7 @@
             "ngram_tokenizer": {
               "type": "ngram",
               "min_gram": 3,
-              "max_gram": 10,
+              "max_gram": 8,
               "token_chars": ["letter", "digit"]
             }
           }
@@ -88,7 +117,8 @@
             "type": "text",
             "analyzer": "english",
             "fields": {
-              "ngram": { "type": "text", "analyzer": "ngram_analyzer" }
+              "ngram": { "type": "text", "analyzer": "ngram_analyzer" },
+              "fuzzy": { "type": "text", "analyzer": "standard" }
             }
           },
           "submission_date": {
@@ -99,7 +129,7 @@
         }
       },
       "settings": {
-        "index.max_ngram_diff": 10,
+        "index.max_ngram_diff": 8,
         "analysis": {
           "analyzer": {
             "ngram_analyzer": {
@@ -112,7 +142,7 @@
             "ngram_tokenizer": {
               "type": "ngram",
               "min_gram": 3,
-              "max_gram": 10,
+              "max_gram": 8,
               "token_chars": ["letter", "digit"]
             }
           }
