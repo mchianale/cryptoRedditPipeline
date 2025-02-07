@@ -1,0 +1,19 @@
+[
+    {
+        "index" : "replies",
+        "mapping" : {
+            "mappings": {
+              "properties": {
+                "author": { "type": "keyword" },
+                "comment_id": { "type": "keyword" },
+                "text": { "type": "text", "analyzer": "standard" },
+                "event": { "type": "object" },
+                "reply_id": { "type": "keyword" },
+                "submission_date": { "type": "date", "format": "dd/MM/yyyy, HH:mm:ss" },
+                "score": { "type": "integer" },
+                "author_id": { "type": "keyword" }
+              }
+            }
+        }
+    }
+]

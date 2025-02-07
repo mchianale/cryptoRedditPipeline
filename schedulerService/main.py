@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import os
 import datetime
 import schedule
+import json 
 
 # Configure Logging
 logging.basicConfig(
@@ -24,6 +25,10 @@ ES_ENDPOINT = "http://elasticsearch:9200"
 REQUEST_NEW_DATA_HOURS = os.environ["REQUEST_NEW_DATA_HOURS"]
 # pretty logging
 SEP = "-" * 30
+# LOAD our mappings
+mapping_file = open("schedulerService/mappings.json", encoding='utf-8')
+MAPPINGS = json.load(mapping_file)
+mapping_file.close()
 
 
 def send_data_to_kafka():
@@ -50,12 +55,21 @@ def send_data_to_kafka():
         logging.error(f"Error sending data: {e}")
         logging.info(f"{SEP}")
 
+def ensure_index_exists(mapping_configuration):
+    index_name, mapping = mapping_configuration['index'], mapping_configuration['mapping']
+    """Check if the index exists and create it if not."""
+    response = requests.get(f"{ES_ENDPOINT}/{index_name}")
 
-# schedule
-# Schedule API Call Every Day at REQUEST_NEW_DATA_HOURS hh:mm
-my_schedule = schedule.Scheduler()
-my_schedule.every().day.at(REQUEST_NEW_DATA_HOURS).do(send_data_to_kafka)
+    if response.status_code == 200:
+        logging.info(f"Index '{index_name}' already exists.")
+    else:
+        logging.info(f"Index '{index_name}' does not exist. Creating...")
+        create_response = requests.put(f"{ES_ENDPOINT}/{index_name}", json=mapping)
 
+        if create_response.status_code == 200:
+            logging.info(f"Index '{index_name}' created successfully!")
+        else:
+            logging.error(f"Failed to create index. Error: {create_response.text}")
 
 def check_health(endpoint):
     max_retry = 0
@@ -78,6 +92,11 @@ def check_health(endpoint):
             max_retry += 1
         time.sleep(1)
 
+# schedule
+# Schedule API Call Every Day at REQUEST_NEW_DATA_HOURS hh:mm
+my_schedule = schedule.Scheduler()
+my_schedule.every().day.at(REQUEST_NEW_DATA_HOURS).do(send_data_to_kafka)
+
 
 if __name__ == "__main__":
     # check our fast API is running
@@ -85,6 +104,9 @@ if __name__ == "__main__":
 
     # check elastic search is good to
     check_health(ES_ENDPOINT)
+    # Knwo we created our mapping if not exists
+    for mapping_configuration in MAPPINGS:
+        ensure_index_exists(mapping_configuration=mapping_configuration)
 
     send_data_to_kafka()
     """while True:
