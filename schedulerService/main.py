@@ -37,8 +37,8 @@ def send_data_to_kafka():
         start_time = time.time()
         logging.info(f"Triggering API to send data to Kafka... {SEP}")
         date_today = datetime.datetime.today().strftime("%d/%m/%Y")
-        #url = f"{SEND_DATA_ENDPOINT}?start_date={date_today}&end_date={date_today}"
-        url = f"{SEND_DATA_ENDPOINT}?start_date=01/02/2025&end_date=06/02/2025"
+        url = f"{SEND_DATA_ENDPOINT}?start_date={date_today}&end_date={date_today}"
+        #url = f"{SEND_DATA_ENDPOINT}?start_date=01/02/2025&end_date=06/02/2025"
         logging.info(f"Calling: {url}...")
         response = requests.post(url)
         end_time = time.time()

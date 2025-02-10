@@ -141,11 +141,35 @@ services:
     
 
   # logstash
-  logstash:
-    container_name: logstash
+  post-logstash:
+    container_name: post-logstash
     build:
       context: .
-      dockerfile: logstash/Dockerfile.logstash
+      dockerfile: logstash/Dockerfile.logstash_post
+    networks:
+      - kafkanet
+      - elk-network
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  comment-logstash:
+    container_name: comment-logstash
+    build:
+      context: .
+      dockerfile: logstash/Dockerfile.logstash_comment
+    networks:
+      - kafkanet
+      - elk-network
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+  
+  reply-logstash:
+    container_name: reply-logstash
+    build:
+      context: .
+      dockerfile: logstash/Dockerfile.logstash_reply
     networks:
       - kafkanet
       - elk-network

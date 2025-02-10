@@ -9,6 +9,6 @@ RUN bin/logstash-plugin install logstash-input-elasticsearch \
     
 # copy configurations
 # our logstash conf
-COPY ./logstash/pipeline/ /usr/share/logstash/pipeline/
+COPY ./logstash/pipeline-reply/ /usr/share/logstash/pipeline/
 # our pipeline
 COPY ./logstash/pipeline.yml /usr/share/logstash/config/pipelines.yml
