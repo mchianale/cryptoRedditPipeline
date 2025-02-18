@@ -1,5 +1,4 @@
-# /kafka-dev-with-docker/part-01/compose-kafka.yml
-version: "3.8"
+# version is depricated so it removed
 
 services:
   # Zookeeper & kafka
@@ -126,8 +125,8 @@ services:
   reddit-api:
     container_name: reddit-api
     build:
-      context: . # Use the current directory as the build context
-      dockerfile: redditAPI/Dockerfile.redditAPI # Specify the Dockerfile location
+      context: .
+      dockerfile: redditAPI/Dockerfile.redditAPI
     ports:
       - "8000:8000"
     networks:
@@ -186,11 +185,35 @@ services:
       elasticsearch:
         condition: service_healthy
 
+  spark-master:
+    image: bitnami/spark:latest
+    container_name: spark-master
+    environment:
+      - SPARK_MODE=master
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+    networks:
+      - spark-network
+
+  spark-worker:
+    image: bitnami/spark:latest
+    container_name: spark-worker
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+    ports:
+      - "8081:8081"
+    networks:
+      - spark-network
+
 networks:
   kafkanet:
-    name: kafkanet # trypirvate to see still working
+    name: kafkanet
   elk-network:
     name: elk-network
+  spark-network:
+    name: spark-network
 
 volumes:
   # kafka
