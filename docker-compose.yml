@@ -36,7 +36,6 @@ services:
       - kafka_0_data:/bitnami/kafka
     depends_on:
       - zookeeper
- 
 
   kafka-1:
     image: bitnami/kafka:latest
@@ -59,7 +58,6 @@ services:
       - kafka_1_data:/bitnami/kafka
     depends_on:
       - zookeeper
-    
 
   kafka-2:
     image: bitnami/kafka:latest
@@ -82,7 +80,6 @@ services:
       - kafka_2_data:/bitnami/kafka
     depends_on:
       - zookeeper
-    
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
@@ -138,7 +135,6 @@ services:
     depends_on:
       elasticsearch:
         condition: service_healthy
-    
 
   # logstash
   post-logstash:
@@ -164,7 +160,7 @@ services:
     depends_on:
       elasticsearch:
         condition: service_healthy
-  
+
   reply-logstash:
     container_name: reply-logstash
     build:
@@ -192,7 +188,7 @@ services:
 
 networks:
   kafkanet:
-    name: kafka-network # trypirvate to see still working
+    name: kafkanet # trypirvate to see still working
   elk-network:
     name: elk-network
 
