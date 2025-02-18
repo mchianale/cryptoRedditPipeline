@@ -63,7 +63,7 @@ For example in the first broker :
 ```bash
 docker exec -it kafka-0 bash
 cd /opt/bitnami/kafka/bin/
-./kafka-console-consumer.sh --bootstrap-server kafka-0:9092 --topic submissions --from-beginning
+./kafka-console-consumer.sh --bootstrap-server kafka-0:9092 --topic posts --from-beginning
 ```
 
 # kafka
@@ -107,3 +107,6 @@ docker compose down --remove-orphans
  
 # a faire 
 # sources
+docker exec -it kafka-0 bash
+I have no name!@dfa997f966ad:/$  kafka-consumer-groups.sh --bootstrap-server kafka-0:9092 --list
+kafka-consumer-groups.sh --bootstrap-server kafka-0:9092 --group logstash --describe

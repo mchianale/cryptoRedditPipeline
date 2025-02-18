@@ -6,6 +6,7 @@ from confluent_kafka import Producer
 import praw
 from praw.models import MoreComments
 import datetime
+import time
 
 # Load environment variables from the .env file
 load_dotenv()
@@ -159,6 +160,7 @@ async def send_data(start_date : str, end_date : str):
                         # produce to kafka 'comments' topic    
                         producer.produce("comments", key=comment_key, value=json.dumps(comment_obj))
                         total_comments += 1
+                    time.sleep(10)
 
         return {
             "status": "success",
