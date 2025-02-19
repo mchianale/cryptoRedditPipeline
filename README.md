@@ -151,6 +151,8 @@ For [**example**](https://github.com/mchianale/cryptoRedditPipeline/tree/main/sp
   <img src="https://github.com/mchianale/cryptoRedditPipeline/blob/main/doc/most_frequent_words.png" alt="global_sch" width="100%">
 </p>
 
+The graph represents the relative share of each word compared to the median of the top 10 words.
+
 ---
 
 ## Source
