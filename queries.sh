@@ -68,7 +68,7 @@ curl -X GET "http://localhost:9200/reddit/_search?pretty" -H "Content-Type: appl
   }
 }'
 
-# time series query mean score of ay reddit type per day
+# time series query mean score of a reddit type per day
 curl -X GET "http://localhost:9200/reddit/_search?pretty" -H "Content-Type: application/json" -d '
 {
   "size": 0,
