@@ -1,27 +1,5 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import explode, split, col, lower
-import logging
-
-# Logging setup
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
-
-# Define stopwords (hardcoded for performance, avoiding nltk overhead)
-STOP_WORDS = set([
-    'i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', "you're", "you've", "you'll", "you'd",
-    'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she', "she's", 'her', 'hers',
-    'herself', 'it', "it's", 'its', 'itself', 'they', 'them', 'their', 'theirs', 'themselves', 'what', 'which',
-    'who', 'whom', 'this', 'that', "that'll", 'these', 'those', 'am', 'is', 'are', 'was', 'were', 'be', 'been',
-    'being', 'have', 'has', 'had', 'having', 'do', 'does', 'did', 'doing', 'a', 'an', 'the', 'and', 'but', 'if',
-    'or', 'because', 'as', 'until', 'while', 'of', 'at', 'by', 'for', 'with', 'about', 'against', 'between',
-    'into', 'through', 'during', 'before', 'after', 'above', 'below', 'to', 'from', 'up', 'down', 'in', 'out',
-    'on', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why',
-    'how', 'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not',
-    'only', 'own', 'same', 'so', 'than', 'too', 'very', 's', 't', 'can', 'will', 'just', 'don', "don't", 'should',
-    "should've", 'now', 'd', 'll', 'm', 'o', 're', 've', 'y', 'ain', 'aren', "aren't", 'couldn', "couldn't",
-    'didn', "didn't", 'doesn', "doesn't", 'hadn', "hadn't", 'hasn', "hasn't", 'haven', "haven't", 'isn', "isn't",
-    'ma', 'mightn', "mightn't", 'mustn', "mustn't", 'needn', "needn't", 'shan', "shan't", 'shouldn', "shouldn't",
-    'wasn', "wasn't", 'weren', "weren't", 'won', "won't", 'wouldn', "wouldn't"
-])
+from pyspark.sql.functions import col
 
 # Initialize Spark session
 spark = (
@@ -44,29 +22,18 @@ df = (
 )
 logging.info("Data read from Elasticsearch")
 
-# Process text data
-df = df.select(lower(col("text")).alias("text"))
-words_df = df.select(explode(split(col("text"), "\\W+")).alias("word"))
-words_filtered = words_df.filter(
-    (col("word") != "") & (~col("word").isin(STOP_WORDS)) & (col("word").rlike("[a-zA-Z]+"))
+# Perform some transformations (example: filter by subject and select specific columns)
+processed_df = df.filter(col("subject") == "bitcoin").select(
+    "author", "text", "submission_date", "subject"
 )
-word_count = words_filtered.groupBy("word").count().orderBy(col("count").desc())
+print(processed_df.show())
+print(processed_df.count())
 
-# Display top words
-logging.info("Most frequent words:")
-top_words = word_count.limit(20).collect()
-for row in top_words:
-    logging.info(f"Word: {row['word']}, Count: {row['count']}")
-
-# Write results back to Elasticsearch
-word_count.write.format("org.elasticsearch.spark.sql")\
-    .option("es.resource", "reddit_word_count")\
-    .option("es.nodes", "elasticsearch")\
-    .option("es.port", "9200")\
-    .mode("overwrite")\
-    .save()
-
-logging.info("Data written to Elasticsearch successfully!")
+# Write the processed data back to Elasticsearch
+processed_df.write.format("org.elasticsearch.spark.sql").option(
+    "es.resource", "processed_reddit/_doc"
+).mode("overwrite").save()
+print("Data written to Elasticsearch")
 
 # Stop Spark session
 spark.stop()

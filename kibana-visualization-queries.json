@@ -1,0 +1,65 @@
+{
+  "Histogram of Document Counts by Subject": {
+    "size": 0,
+    "aggs": {
+      "documents_by_subject": {
+        "terms": {
+          "field": "subject",
+          "size": 10
+        }
+      }
+    }
+  },
+  "Time Series of Document Counts by Submission Date": {
+    "size": 0,
+    "aggs": {
+      "documents_over_time": {
+        "date_histogram": {
+          "field": "submission_date",
+          "calendar_interval": "month",
+          "format": "yyyy-MM"
+        }
+      }
+    }
+  },
+  "Average Score by Subject": {
+    "size": 0,
+    "aggs": {
+      "average_score_by_subject": {
+        "terms": {
+          "field": "subject",
+          "size": 10
+        },
+        "aggs": {
+          "average_score": {
+            "avg": {
+              "field": "score"
+            }
+          }
+        }
+      }
+    }
+  },
+  "Top Authors by Document Count": {
+    "size": 0,
+    "aggs": {
+      "authors_by_document_count": {
+        "terms": {
+          "field": "author",
+          "size": 10
+        }
+      }
+    }
+  },
+  " Distribution of Text Lengths": {
+    "size": 0,
+    "aggs": {
+      "text_length_distribution": {
+        "histogram": {
+          "field": "text",
+          "interval": 100
+        }
+      }
+    }
+  }
+}
