@@ -1,16 +1,45 @@
-# Title du projet 
-presentation etc...
+# Reddit Indexing Pipeline for Crypto Trend Analysis
 
-To run and change config of our current pipeline see `RUN.md`.
+In the fast-paced world of cryptocurrencies, tracking investor sentiment in real time is crucial. This project automates the collection of Reddit posts and comments from crypto-related subreddits, indexing them in Elasticsearch for analysis.
+
+By filtering posts based on relevant keywords, this pipeline helps identify market trends and sentiment shifts. The processed data can be used for monitoring discussions, detecting emerging signals, and supporting data-driven decision-making in the crypto space.
+
+**To run and change config of our current pipeline see `RUN.md`.**
 
 ---
 
-## Summary
-
----
-
-## Current Architecture
+## Architecture Overview
+### 🔄 **Workflow Diagram**
 ![global_sch](https://github.com/mchianale/cryptoRedditPipeline/blob/main/doc/currentArchi.png)
+
+Our system automates the collection, processing, and indexing of Reddit data for trend analysis in the cryptocurrency space. Below is an overview of the key components:
+
+### 🕒 **Scheduler Service**
+- Checks if the API is available before triggering it.
+- Runs the API once per day to fetch new Reddit data.
+- Ensures Elasticsearch indices are available and configures mappings if needed.
+
+### 🚀 **Reddit API (FastAPI)**
+- Uses PRAW to fetch posts and their associated comments from Reddit.
+- Structures the collected data and sends it to Kafka in three distinct topics:
+  - **Posts**
+  - **Comments**
+  - **Replies to comments**
+
+### 🔄 **Kafka (Message Broker)**
+- Manages data flow between the API and the indexing pipeline.
+- Enables asynchronous message distribution to multiple consumers.
+
+### 🔧 **Logstash Pipeline**
+- Consumes messages produced by Kafka.
+- Transforms and structures the data for indexing.
+- Sends processed data to Elasticsearch.
+- Uses separate pipelines for each Kafka topic.
+
+### 📊 **Elasticsearch**
+- Stores structured data from Logstash.
+- Provides advanced search and analytical capabilities for Reddit posts.
+- Enables trend discovery and sentiment analysis in the crypto market.
 
 ---
 
@@ -57,37 +86,71 @@ Kafka ensures real-time processing and reliable message delivery, enabling seaml
 
 ---
 
-## Logstash
-regarde dans folder logstash les fichier conf modifiable etc..
+## 🔧 Logstash
+
+Logstash plays a key role in our pipeline by consuming messages from Kafka and sending them to Elasticsearch for indexing and analysis of Reddit data. 
+
+Each type of data (**posts, comments, replies**) is processed separately using three dedicated Logstash instances. Each instance is responsible for consuming a specific Kafka topic and indexing it in Elasticsearch. This separation allows us to apply transformations tailored to each type of message.
+
+### ⚙️ **Logstash General Configuration**
+Each Logstash instance runs independently with its own configuration:
+
+```yaml
+pipeline.id: main
+path.config: "/usr/share/logstash/pipeline"
+```
+
+### Parallel Logstash Pipelines
+We run three Logstash pipelines in parallel:
+- **Logstash** - Posts: Consumes the posts topic and indexes Reddit posts.
+- **Logstash** - Comments: Consumes the comments topic and indexes Reddit comments.
+- **Logstash** - Replies: Consumes the replies topic and indexes Reddit replies.
+
+All three data types are stored in a single Elasticsearch index (reddit)
 
 ---
 
 ## Elastic-search
-### Data & Mappings
-### Queries
+### 🔍 Example Query: Searching Reddit Data in Elasticsearch
+To search for posts containing specific keywords (e.g., **Bitcoin BTC**) in our indexed Reddit data, we can use the following **Elasticsearch query**:
+
+```bash
+curl -X GET "http://localhost:9200/reddit/_search?pretty" -H "Content-Type: application/json" -d '
+{
+  "query": {
+    "match": {
+      "text": "bitcoin btc"
+    }
+  }
+}'
+```
+- This query searches for documents in the `reddit index` where the text field contains the terms "bitcoin" or "btc"
+- In our case, this query returned `632` documents, highlighting that Bitcoin (BTC) is a highly discussed topic in the CryptoCurrency subreddit.
 
 ---
 
 ## Run a Spark job
-- First create a new `.py` job for spark, see [dd](dd).
-- After, copy your job in spark-master:
+1. First, create a new .py job for Spark. See this example.
+2. Copy your job script to the Spark master container:
 ```bash
 docker cp ./spark/job.py spark-master:/opt/bitnami/spark/job.py     
 ```
-- Now run it:
+3. Run the job using Spark:
 ```bash
 docker exec -it spark-master /opt/bitnami/spark/bin/spark-submit --master spark://spark-master:7077 --packages org.elasticsearch:elasticsearch-spark-30_2.12:8.6.2 /opt/bitnami/spark/job.py  
 ```
 
-In `docker-compose`, **sparks** had same network as **elatsic-search** to retrieve elatsic search data and from spark job create a new index.
-For example we have use spark to get occurences by word in our reddit API:
+In `docker-compose`, **Spark and Elasticsearch** are on the same network to allow Spark to read data from Elasticsearch and write new indices back.
+
+For example, we use Spark to count word occurrences from our Reddit API dataset and store the results in a new Elasticsearch index.
+
+<p align="center">
+  <img src="https://github.com/mchianale/cryptoRedditPipeline/blob/main/doc/most_frequent_words.png" alt="global_sch" width="50%">
+</p>
+
 ---
 
 ## Source
 - [Kafka Development With Docker](https://jaehyeon.me/blog/2023-05-04-kafka-development-with-docker-part-1/)
 
 
-
-docker cp ./spark/job.py spark-master:/opt/bitnami/spark/job.py     
-
-docker exec -it spark-master /opt/bitnami/spark/bin/spark-submit --master spark://spark-master:7077 --packages org.elasticsearch:elasticsearch-spark-30_2.12:8.6.2 /opt/bitnami/spark/job.py
