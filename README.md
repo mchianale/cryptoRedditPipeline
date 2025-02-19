@@ -145,7 +145,7 @@ In `docker-compose`, **Spark and Elasticsearch** are on the same network to allo
 For example, we use Spark to count word occurrences from our Reddit API dataset and store the results in a new Elasticsearch index.
 
 <p align="center">
-  <img src="https://github.com/mchianale/cryptoRedditPipeline/blob/main/doc/most_frequent_words.png" alt="global_sch" width="50%">
+  <img src="https://github.com/mchianale/cryptoRedditPipeline/blob/main/doc/most_frequent_words.png" alt="global_sch" width="100%">
 </p>
 
 ---
