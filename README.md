@@ -68,22 +68,26 @@ regarde dans folder logstash les fichier conf modifiable etc..
 
 ---
 
-## Hadoop
+## Run a Spark job
+- First create a new `.py` job for spark, see [dd](dd).
+- After, copy your job in spark-master:
+```bash
+docker cp ./spark/job.py spark-master:/opt/bitnami/spark/job.py     
+```
+- Now run it:
+```bash
+docker exec -it spark-master /opt/bitnami/spark/bin/spark-submit --master spark://spark-master:7077 --packages org.elasticsearch:elasticsearch-spark-30_2.12:8.6.2 /opt/bitnami/spark/job.py  
+```
 
----
-
-## Spark
-
----
-
-## Comparaison Hadoop Vs Spark
-
----
-
-## Conclusion
-
+In `docker-compose`, **sparks** had same network as **elatsic-search** to retrieve elatsic search data and from spark job create a new index.
+For example we have use spark to get occurences by word in our reddit API:
 ---
 
 ## Source
 - [Kafka Development With Docker](https://jaehyeon.me/blog/2023-05-04-kafka-development-with-docker-part-1/)
 
+
+
+docker cp ./spark/job.py spark-master:/opt/bitnami/spark/job.py     
+
+docker exec -it spark-master /opt/bitnami/spark/bin/spark-submit --master spark://spark-master:7077 --packages org.elasticsearch:elasticsearch-spark-30_2.12:8.6.2 /opt/bitnami/spark/job.py

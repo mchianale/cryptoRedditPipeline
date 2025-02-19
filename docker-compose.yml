@@ -103,6 +103,7 @@ services:
     #       memory: 2g
     networks:
       - elk-network
+      - spark-network
 
   kibana:
     image: docker.elastic.co/kibana/kibana:8.10.2
