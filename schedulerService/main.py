@@ -38,7 +38,7 @@ def send_data_to_kafka():
         logging.info(f"Triggering API to send data to Kafka... {SEP}")
         date_today = datetime.datetime.today().strftime("%d/%m/%Y")
         #url = f"{SEND_DATA_ENDPOINT}?start_date={date_today}&end_date={date_today}"
-        url = f"{SEND_DATA_ENDPOINT}?start_date=01/02/2025&end_date=06/02/2025"
+        url = f"{SEND_DATA_ENDPOINT}?start_date=08/02/2025&end_date=14/02/2025"
         logging.info(f"Calling: {url}...")
         response = requests.post(url)
         end_time = time.time()
@@ -109,7 +109,7 @@ if __name__ == "__main__":
     for mapping_configuration in MAPPINGS:
         ensure_index_exists(mapping_configuration=mapping_configuration)
 
-    send_data_to_kafka()
+    #send_data_to_kafka()
     """while True:
         my_schedule.run_pending()
         time.sleep(5)  # Sleep for 5 second to prevent high CPU usage

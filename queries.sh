@@ -5,62 +5,90 @@
 # here the command to install it on windows system using choco package manager
 # choco install curl
 # or you canuse WSL
-# query to fetch all the documents where text has the word "Bitcoin"
-# query to fetch all the documents where text has the word "Bitcoin"
-curl -X POST "http://localhost:9200/reddit/_search?pretty" -H "Content-Type: application/json" -d '
+
+
+# query to fetch all the documents where text has the word "bitcoin" "btc"
+curl -X GET "http://localhost:9200/reddit/_search?pretty" -H "Content-Type: application/json" -d '
 {
   "query": {
     "match": {
-      "text": "Bitcoin"
+      "text": "bitcoin btc"
     }
   }
 }'
 
-# query to aggregate the number of posts per subject
-curl -X POST "http://localhost:9200/reddit/_search?pretty" -H "Content-Type: application/json" -d '
-{
+# query to aggregate the number of replies and comments made per hour
+curl -X GET "http://localhost:9200/reddit/_search?pretty" -H "Content-Type: application/json" -d '{
   "size": 0,
+  "query": {
+    "terms": {
+      "reddit_type.keyword": ["comment", "reply"]
+    }
+  },
   "aggs": {
-    "posts_per_subject": {
+    "comments_replies_by_hour": {
       "terms": {
-        "field": "subject.keyword"
+        "script": {
+          "source": "doc[\"submission_date\"].value.getHour()",
+          "lang": "painless"
+        },
+        "size": 24,
+        "order": { "_key": "asc" }
+      },
+      "aggs": {
+        "count_per_hour": {
+          "value_count": { "field": "submission_date" }
+        }
       }
     }
   }
 }'
 
-# query that uses the ngram field to search for the word "Bitc" in the text field
-curl -X POST "http://localhost:9200/reddit/_search?pretty" -H "Content-Type: application/json" -d '
+
+# query that uses the ngram field to search for the lemme invest (investissment, invests etc..)
+curl -X GET "http://localhost:9200/reddit/_search?pretty" -H "Content-Type: application/json" -d '
 {
   "query": {
     "match": {
-      "text.ngram": "Bitc"
+      "text.ngram": "invest"
     }
   }
 }'
 
 # query that uses fuzzy search to search for the word "Ethereeum" in the text field
-curl -X POST "http://localhost:9200/reddit/_search?pretty" -H "Content-Type: application/json" -d '
+curl -X GET "http://localhost:9200/reddit/_search?pretty" -H "Content-Type: application/json" -d '
 {
   "query": {
     "fuzzy": {
       "text.fuzzy": {
-        "value": "Ethereeum",
+        "value": "ethereum",
         "fuzziness": "AUTO"
       }
     }
   }
 }'
 
-# time series query that retrieves posts created in the last 7 days
-curl -X POST "http://localhost:9200/reddit/_search?pretty" -H "Content-Type: application/json" -d '
+# time series query mean score of ay reddit type per day
+curl -X GET "http://localhost:9200/reddit/_search?pretty" -H "Content-Type: application/json" -d '
 {
-  "query": {
-    "range": {
-      "submission_date": {
-        "gte": "now-7d/d",
-        "lte": "now/d",
-        "format": "strict_date_optional_time"
+  "size": 0,
+  "aggs": {
+    "score_evolution": {
+      "date_histogram": {
+        "field": "submission_date",
+        "calendar_interval": "day"
+      },
+      "aggs": {
+        "avg_score": {
+          "avg": {
+            "field": "score"
+          }
+        },
+        "sorted_buckets": {
+          "bucket_sort": {
+            "sort": [{ "avg_score.value": { "order": "desc" } }] 
+          }
+        }
       }
     }
   }
