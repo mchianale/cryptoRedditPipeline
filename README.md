@@ -18,6 +18,7 @@ Our system automates the collection, processing, and indexing of Reddit data for
 - Checks if the API is available before triggering it.
 - Runs the API once per day to fetch new Reddit data.
 - Ensures Elasticsearch indices are available and configures mappings if needed.
+- [**See**](https://github.com/mchianale/cryptoRedditPipeline/tree/main/schedulerService)
 
 ### 🚀 **Reddit API (FastAPI)**
 - Uses PRAW to fetch posts and their associated comments from Reddit.
@@ -25,6 +26,7 @@ Our system automates the collection, processing, and indexing of Reddit data for
   - **Posts**
   - **Comments**
   - **Replies to comments**
+- [**See**](https://github.com/mchianale/cryptoRedditPipeline/tree/main/redditAPI)
 
 ### 🔄 **Kafka (Message Broker)**
 - Manages data flow between the API and the indexing pipeline.
@@ -35,6 +37,7 @@ Our system automates the collection, processing, and indexing of Reddit data for
 - Transforms and structures the data for indexing.
 - Sends processed data to Elasticsearch.
 - Uses separate pipelines for each Kafka topic.
+- [**See conf files**](https://github.com/mchianale/cryptoRedditPipeline/tree/main/logstash)
 
 ### 📊 **Elasticsearch**
 - Stores structured data from Logstash.
@@ -102,9 +105,9 @@ path.config: "/usr/share/logstash/pipeline"
 
 ### Parallel Logstash Pipelines
 We run three Logstash pipelines in parallel:
-- **Logstash** - Posts: Consumes the posts topic and indexes Reddit posts.
-- **Logstash** - Comments: Consumes the comments topic and indexes Reddit comments.
-- **Logstash** - Replies: Consumes the replies topic and indexes Reddit replies.
+- **Logstash - Posts**: Consumes the posts topic and indexes Reddit posts, [**See the conf file**](https://github.com/mchianale/cryptoRedditPipeline/blob/main/logstash/pipeline-post/post_logstash.conf).
+- **Logstash - Comments**: Consumes the comments topic and indexes Reddit comments,[**See the conf file**](https://github.com/mchianale/cryptoRedditPipeline/blob/main/logstash/pipeline-comment/comment_logstash.conf).
+- **Logstash - Replies**: Consumes the replies topic and indexes Reddit replies, [**See the conf file**](https://github.com/mchianale/cryptoRedditPipeline/blob/main/logstash/pipeline-reply/reply_logstash.conf).
 
 All three data types are stored in a single Elasticsearch index (reddit)
 
@@ -130,7 +133,7 @@ curl -X GET "http://localhost:9200/reddit/_search?pretty" -H "Content-Type: appl
 ---
 
 ## Run a Spark job
-1. First, create a new .py job for Spark. See this example.
+1. First, create a new .py job for Spark. [**See all examples we have made**](https://github.com/mchianale/cryptoRedditPipeline/tree/main/spark).
 2. Copy your job script to the Spark master container:
 ```bash
 docker cp ./spark/job.py spark-master:/opt/bitnami/spark/job.py     
@@ -142,7 +145,7 @@ docker exec -it spark-master /opt/bitnami/spark/bin/spark-submit --master spark:
 
 In `docker-compose`, **Spark and Elasticsearch** are on the same network to allow Spark to read data from Elasticsearch and write new indices back.
 
-For example, we use Spark to count word occurrences from our Reddit API dataset and store the results in a new Elasticsearch index.
+For [**example**](https://github.com/mchianale/cryptoRedditPipeline/tree/main/spark/job.py), we use Spark to count word occurrences from our Reddit API dataset and store the results in a new Elasticsearch index.
 
 <p align="center">
   <img src="https://github.com/mchianale/cryptoRedditPipeline/blob/main/doc/most_frequent_words.png" alt="global_sch" width="100%">
