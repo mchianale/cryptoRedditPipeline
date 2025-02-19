@@ -1,5 +1,5 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col
+from pyspark.sql.functions import col, length, avg
 
 # Initialize Spark session
 spark = (
@@ -20,15 +20,17 @@ df = (
 )
 print("Data read from Elasticsearch")
 
-# Perform some transformations (example: filter by subject and select specific columns)
-processed_df = df.filter(col("subject") == "bitcoin").select(
-    "author", "text", "submission_date", "subject"
-)
-print(processed_df.show())
-print(processed_df.count())
+# Perform some transformations (example: filter by subject and calculate average text length)
+filtered_df = df.filter(col("subject") == "bitcoin")
+average_text_length = filtered_df.select(avg(length(col("text")))).collect()[0][0]
+print(f"Average text length for 'bitcoin' subject: {average_text_length}")
 
-# Write the processed data back to Elasticsearch
-processed_df.write.format("org.elasticsearch.spark.sql").option(
+# Write the processed data back to Elasticsearch (optional)
+# Here we create a DataFrame with the result and write it back to Elasticsearch
+result_df = spark.createDataFrame(
+    [("bitcoin", average_text_length)], ["subject", "average_text_length"]
+)
+result_df.write.format("org.elasticsearch.spark.sql").option(
     "es.resource", "processed_reddit/_doc"
 ).mode("overwrite").save()
 print("Data written to Elasticsearch")
